@@ -18,7 +18,7 @@ const setLabel = label => {
 const doneIssueLabel = "Done Dev";
 
 const getContent = async () => {
-  const [milestone] = await fetch(`${apiUrl}/milestone`).then(r => r.json());
+  const milestone = await fetch(`${apiUrl}/milestone`).then(r => r.json());
 
   const issues = await fetch(`${apiUrl}/issues`).then(r => r.json());
 
@@ -100,22 +100,22 @@ const getContent = async () => {
   };
 })();
 const { issuesLength, mappedDates, days, color, issuesArr } = window.config;
-document.querySelector("select").addEventListener("change", e => {
-  fetch("/update", {
-    method: "POST",
-    body: JSON.stringify({ label: e.target.value }),
-    headers: {
-      "Content-Type": "application/json"
-    }
-  })
-    .then(r => r.json())
-    .then(r => {
-      chart.destroy();
-      chart = createChart(r.issuesArr, r.mappedDates, r.issuesLength, r.color);
-      chart.data.label = r.label;
-      chart.update();
-    });
-});
+// document.querySelector("select").addEventListener("change", e => {
+//   fetch("/update", {
+//     method: "POST",
+//     body: JSON.stringify({ label: e.target.value }),
+//     headers: {
+//       "Content-Type": "application/json"
+//     }
+//   })
+//     .then(r => r.json())
+//     .then(r => {
+//       chart.destroy();
+//       chart = createChart(r.issuesArr, r.mappedDates, r.issuesLength, r.color);
+//       chart.data.label = r.label;
+//       chart.update();
+//     });
+// });
 
 const canvas = document.getElementById("myChart");
 canvas.width = 1800;
