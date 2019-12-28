@@ -87,7 +87,7 @@ const getContent = async () => {
   } = await getContent();
   const issuesArr = await issuesCount;
 
-  window.config = {
+  const config = {
     issuesLength: issues.length,
     mappedDates: idealMonthData.map(
       (e, i) =>
@@ -98,7 +98,7 @@ const getContent = async () => {
     issuesArr: issuesArr
   };
 
-  const { issuesLength, mappedDates, days, color, issuesArr } = window.config;
+  const { issuesLength, mappedDates, days, color, issuesArr } = config;
 
 const canvas = document.getElementById("myChart");
 canvas.width = 1800;
