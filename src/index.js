@@ -98,7 +98,7 @@ const getContent = async () => {
     issuesArr: issuesArr
   };
 
-  const { issuesLength, mappedDates, days, color, issuesArr } = config;
+  const { issuesLength, mappedDates, days, color } = config;
 
 const canvas = document.getElementById("myChart");
 canvas.width = 1800;
