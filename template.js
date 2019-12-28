@@ -6,7 +6,7 @@ const getTemplate = (
   issuesArr
 ) => `
 <html>
-    <head><title>Chart</title></head>
+    <head><ttle>Chart</title></head>
     <body>
     <canvas id="myChart"></canvas>
     <select>
