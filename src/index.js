@@ -2,7 +2,7 @@
 // Helpers
 import { getDates, getData, convertData, transformData } from "./helpers";
 
-const apiUrl = "https://damp-reaches-06511.herokuapp.com/";
+const apiUrl = "https://damp-reaches-06511.herokuapp.com";
 
 const currentDay = new Date().getUTCDate();
 const currentMonth = new Date().getUTCMonth() + 1;
