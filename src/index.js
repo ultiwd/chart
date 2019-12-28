@@ -97,24 +97,8 @@ const getContent = async () => {
     color: labels[0].color,
     issuesArr: issuesArr
   };
-})();
-const { issuesLength, mappedDates, days, color, issuesArr } = window.config;
-// document.querySelector("select").addEventListener("change", e => {
-//   fetch("/update", {
-//     method: "POST",
-//     body: JSON.stringify({ label: e.target.value }),
-//     headers: {
-//       "Content-Type": "application/json"
-//     }
-//   })
-//     .then(r => r.json())
-//     .then(r => {
-//       chart.destroy();
-//       chart = createChart(r.issuesArr, r.mappedDates, r.issuesLength, r.color);
-//       chart.data.label = r.label;
-//       chart.update();
-//     });
-// });
+
+  const { issuesLength, mappedDates, days, color, issuesArr } = window.config;
 
 const canvas = document.getElementById("myChart");
 canvas.width = 1800;
@@ -149,8 +133,8 @@ function createChart(issuesArr, mappedDates, issuesLength, color) {
           lineTension: 0.2,
           backgroundColor: "rgba(0, 0, 0, 0)",
           borderColor:
-            // '#03a9f4'
-            color
+          // '#03a9f4'
+          color
         },
         {
           datalabels: {
@@ -164,7 +148,7 @@ function createChart(issuesArr, mappedDates, issuesLength, color) {
       ],
       labels: days
     },
-
+    
     options: {
       responsive: false,
       animation: {
@@ -195,3 +179,22 @@ function createChart(issuesArr, mappedDates, issuesLength, color) {
 }
 
 let chart = createChart([issuesArr], [mappedDates], issuesLength, color);
+
+})();
+
+// document.querySelector("select").addEventListener("change", e => {
+//   fetch("/update", {
+//     method: "POST",
+//     body: JSON.stringify({ label: e.target.value }),
+//     headers: {
+//       "Content-Type": "application/json"
+//     }
+//   })
+//     .then(r => r.json())
+//     .then(r => {
+//       chart.destroy();
+//       chart = createChart(r.issuesArr, r.mappedDates, r.issuesLength, r.color);
+//       chart.data.label = r.label;
+//       chart.update();
+//     });
+// });
