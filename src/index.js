@@ -60,10 +60,9 @@ const getContent = async () => {
   ]);
 
   const getIssuesStatistics = async (year, month, day) =>
-    fetch(`${apiUrl}/issues_statistics`, {
-      method: "POST",
-      body: JSON.stringify({ year, month, day })
-    }).then(r => r.json());
+    fetch(
+      `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}`
+    ).then(r => r.json());
 
   const issuesCount = Promise.all(
     monthData
