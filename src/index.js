@@ -86,7 +86,7 @@ const getContent = async () => {
     issuesCount
   } = await getContent();
   const issuesArr = await issuesCount;
-  
+
   const config = {
     issuesLength: issues.length,
     mappedDates: idealMonthData.map(
@@ -99,87 +99,87 @@ const getContent = async () => {
   };
 
   const { issuesLength, mappedDates, days, color } = config;
-  console.log(issuesArr, mappedDates)
-const canvas = document.getElementById("myChart");
-canvas.width = 1800;
-canvas.height = 800;
-// Chart.defaults.global.elements.point.pointStyle = 'dash'
-let i = 0;
-const ctx = canvas.getContext("2d");
-Chart.defaults.global.plugins.datalabels.formatter = value => value.y;
+  console.log(issuesArr, mappedDates);
+  const canvas = document.getElementById("myChart");
+  canvas.width = 1800;
+  canvas.height = 800;
+  // Chart.defaults.global.elements.point.pointStyle = 'dash'
+  let i = 0;
+  const ctx = canvas.getContext("2d");
+  Chart.defaults.global.plugins.datalabels.formatter = value => value.y;
 
-function createChart(issuesArr, mappedDates, issuesLength, color) {
-  return new Chart(ctx, {
-    plugins: [ChartDataLabels],
-    type: "line",
-    data: {
-      datasets: [
-        {
-          datalabels: {
-            align: "top",
-            font: {
-              size: 20,
-              weight: "bold"
-            },
-            labels: {
-              value: {},
-              title: {
-                // color: 'blue'
-              }
-            }
-          },
-          label: "Sprint Burndown",
-          data: issuesArr,
-          lineTension: 0.2,
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          borderColor:
-          // '#03a9f4'
-          color
-        },
-        {
-          datalabels: {
-            display: false
-          },
-          label: "Ideal Burndown",
-          data: mappedDates,
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          borderWidth: 1
-        }
-      ],
-      labels: days
-    },
-    
-    options: {
-      responsive: false,
-      animation: {
-        easing: "linear"
-      },
-      scales: {
-        yAxes: [
+  function createChart(issuesArr, mappedDates, issuesLength, color) {
+    return new Chart(ctx, {
+      plugins: [ChartDataLabels],
+      type: "line",
+      data: {
+        datasets: [
           {
-            gridLines: {
+            datalabels: {
+              align: "top",
+              font: {
+                size: 20,
+                weight: "bold"
+              },
+              labels: {
+                value: {},
+                title: {
+                  // color: 'blue'
+                }
+              }
+            },
+            label: "Sprint Burndown",
+            data: issuesArr,
+            lineTension: 0.2,
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            borderColor:
+              // '#03a9f4'
+              color
+          },
+          {
+            datalabels: {
               display: false
             },
-            ticks: {
-              max: issuesLength,
-              min: 0
-            }
+            label: "Ideal Burndown",
+            data: mappedDates,
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            borderWidth: 1
           }
         ],
-        xAxes: [
-          {
-            gridLines: {
-              display: false
+        labels: days
+      },
+
+      options: {
+        responsive: false,
+        animation: {
+          easing: "linear"
+        },
+        scales: {
+          yAxes: [
+            {
+              gridLines: {
+                display: false
+              },
+              ticks: {
+                max: issuesLength,
+                min: 0
+              }
             }
-          }
-        ]
+          ],
+          xAxes: [
+            {
+              gridLines: {
+                display: false
+              }
+            }
+          ]
+        }
       }
-    }
-  });
-}
+    });
+  }
 
-let chart = createChart([issuesArr], [mappedDates], issuesLength, color);
-
+  let chart = createChart(issuesArr, mappedDates, issuesLength, color);
+  window.chart = chart
 })();
 
 // document.querySelector("select").addEventListener("change", e => {
