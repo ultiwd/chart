@@ -20,7 +20,7 @@ module.exports = {
                   targets: {
                     "browsers": ["> 1%", "last 2 versions", "Android >= 3.2", "not ie <= 8"]
                   },
-                  useBuiltIns: true
+                  useBuiltIns: 'usage'
                 }
               ]
             ],
