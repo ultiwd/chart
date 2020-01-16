@@ -2,7 +2,8 @@ const axios = require("axios");
 
 export const getApiUrl = (year, month) =>
   `https://isdayoff.ru/api/getdata?year=${year}&month=${month}`;
-  export const getData = async (year, month) => [
+
+export const getData = async (year, month) => [
   ...(
     await axios({
       url: getApiUrl(year, month),
@@ -29,7 +30,7 @@ export const convertData = (data, year, month, day, type) =>
         (type === "start" ? el.day >= day : el.day <= day)
     );
 
-    export const transformData = arr => [
+export const transformData = arr => [
   arr
     .flatMap(e => e)
     .reduceRight(
@@ -80,4 +81,3 @@ export const getDates = milestone => ({
 //     }
 //   }
 // });
-

@@ -34,13 +34,53 @@ const getContent = async () => {
     endMonth,
     endYear
   } = getDates(milestone);
-
   if (startYear === endYear && startMonth === endMonth) {
-    const [idealMonthData, monthData] = getData(startYear, startMonth)
-      .map((el, i) => ({ [i + 1]: el === "0" ? "workday" : "holyday" }))
-      .filter((e, i) => i + 1 >= startDay && i + 1 <= endDay);
+    const monthData = (await getData(startYear, startMonth))
+      .map((el, i) => ({
+        day: i + 1,
+        type: el === "0" ? "workday" : "holyday",
+        month: startMonth,
+        year: startYear
+      }))
+      .filter(
+        el => el.type === "workday" && el.day >= startDay && el.day <= endDay
+      );
 
-    return { issues, idealMonthData, monthData, labels, milestone };
+    const idealMonthData = monthData
+      .reduceRight(
+        (acc, e, i) => {
+          if (acc.countOfThursdays === 0) {
+            const { day, month, year } = e;
+            if (new Date(`${month}-${day}-${year}`).getDay() === 4) {
+              return { ...acc, countOfThursdays: 1, arr: [...acc.arr, e] };
+            }
+            return acc;
+          }
+          return { ...acc, arr: [...acc.arr, e] };
+        },
+        { countOfThursdays: 0, arr: [] }
+      )
+      .arr.reverse();
+    const getIssuesStatistics = async (year, month, day) =>
+      fetch(
+        `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}`
+      ).then(r => r.json());
+    const issuesCount = Promise.all(
+      monthData
+        .filter(
+          e => 
+             e.day <= currentDay
+        )
+        .map(e => getIssuesStatistics(e.year, e.month, e.day))
+    ).then(v => v.map(e => issues.length - e.statistics.counts.opened));
+    return {
+      issues,
+      idealMonthData,
+      monthData,
+      labels,
+      milestone,
+      issuesCount
+    };
   }
   const [idealMonthData, monthData] = transformData([
     convertData(
@@ -59,7 +99,7 @@ const getContent = async () => {
     )
   ]);
 
-  const getIssuesStatistics = async (year, month, day) =>
+  const getIssuesStatistics = (year, month, day) =>
     fetch(
       `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}`
     ).then(r => r.json());
@@ -68,11 +108,13 @@ const getContent = async () => {
     monthData
       .filter(
         e =>
-          e.day[0] <= currentDay &&
-          e.month === currentMonth &&
-          e.year === currentYear
-      )
-      .map(e => getIssuesStatistics(e.year, e.month, e.day[0]))
+           (e.day <= currentDay &&
+            e.month === currentMonth &&
+            e.year === currentYear) ||(
+          e.month > currentMonth ||
+          e.year > currentYear)
+        )
+      .map(e => getIssuesStatistics(e.year, e.month, e.day))
   ).then(v => v.map(e => issues.length - e.statistics.counts.opened));
   return { issues, idealMonthData, monthData, labels, milestone, issuesCount };
 };
@@ -99,14 +141,19 @@ const getContent = async () => {
   };
 
   const { issuesLength, mappedDates, days, color } = config;
-  console.log(issuesArr, mappedDates);
   const canvas = document.getElementById("myChart");
   canvas.width = 1800;
   canvas.height = 800;
-  // Chart.defaults.global.elements.point.pointStyle = 'dash'
-  let i = 0;
   const ctx = canvas.getContext("2d");
+  Chart.defaults.global.defaultFontColor = "white";
   Chart.defaults.global.plugins.datalabels.formatter = value => value.y;
+  const gradientStroke = ctx.createLinearGradient(500, 20, 300, 100);
+  // gradientStroke.addColorStop(0, '#fc28a8');
+  gradientStroke.addColorStop(1, "#03edf9");
+  ctx.shadowColor = "#03edf9";
+  ctx.shadowBlur = 15;
+
+  const gradientFill = ctx.createLinearGradient(-50, 0, 10, 0);
 
   function createChart(issuesArr, mappedDates, issuesLength, color) {
     return new Chart(ctx, {
@@ -118,11 +165,13 @@ const getContent = async () => {
             datalabels: {
               align: "top",
               font: {
-                size: 20,
-                weight: "bold"
+                size: 35,
+                weight: "bold",
+                color: "#fc28a8"
               },
               labels: {
                 value: {},
+                fontColor: "#fc28a8",
                 title: {
                   // color: 'blue'
                 }
@@ -131,10 +180,10 @@ const getContent = async () => {
             label: "Sprint Burndown",
             data: issuesArr,
             lineTension: 0.2,
-            backgroundColor: "rgba(0, 0, 0, 0)",
-            borderColor:
-              // '#03a9f4'
-              color
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 10,
+            borderColor: '#fc28a8',
+            borderWidth: 7,
           },
           {
             datalabels: {
@@ -142,14 +191,26 @@ const getContent = async () => {
             },
             label: "Ideal Burndown",
             data: mappedDates,
-            backgroundColor: "rgba(0, 0, 0, 0)",
-            borderWidth: 1
+            borderColor: gradientStroke,
+            pointBorderColor: "#03edf9",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 10,
+            fill: true,
+            backgroundColor: gradientFill,
+            borderWidth: 7,
+            fontColor: "black"
           }
         ],
         labels: days
       },
 
       options: {
+        layout: {
+          padding: {
+              top: 50,
+              bottom: 0
+          }
+      },
         responsive: false,
         animation: {
           easing: "linear"
@@ -177,24 +238,26 @@ const getContent = async () => {
       }
     });
   }
+  console.log(issuesArr)
+  const chart = createChart(issuesArr, mappedDates, issuesLength, color);
+  window.chart = chart;
 
-  let chart = createChart(issuesArr, mappedDates, issuesLength, color);
-  window.chart = chart
+  setInterval(async () => {
+    const { issues, idealMonthData, labels, issuesCount } = await getContent();
+    const newIssuesArr = await issuesCount;
+    const config = {
+      issuesLength: issues.length,
+      mappedDates: idealMonthData.map(
+        (e, i) =>
+          issues.length - (issues.length / (idealMonthData.length - 1)) * i
+      ),
+      color: labels[0].color
+    };
+
+    const { issuesLength, mappedDates, color } = config;
+
+    window.chart.destroy();
+    window.chart = createChart(newIssuesArr, mappedDates, issuesLength, color);
+    window.chart.update();
+  }, 1000000);
 })();
-
-// document.querySelector("select").addEventListener("change", e => {
-//   fetch("/update", {
-//     method: "POST",
-//     body: JSON.stringify({ label: e.target.value }),
-//     headers: {
-//       "Content-Type": "application/json"
-//     }
-//   })
-//     .then(r => r.json())
-//     .then(r => {
-//       chart.destroy();
-//       chart = createChart(r.issuesArr, r.mappedDates, r.issuesLength, r.color);
-//       chart.data.label = r.label;
-//       chart.update();
-//     });
-// });
