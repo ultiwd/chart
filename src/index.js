@@ -67,10 +67,7 @@ const getContent = async () => {
       ).then(r => r.json());
     const issuesCount = Promise.all(
       monthData
-        .filter(
-          e => 
-             e.day <= currentDay
-        )
+        .filter(e => e.day <= currentDay)
         .map(e => getIssuesStatistics(e.year, e.month, e.day))
     ).then(v => v.map(e => issues.length - e.statistics.counts.opened));
     return {
@@ -108,12 +105,11 @@ const getContent = async () => {
     monthData
       .filter(
         e =>
-           (e.day <= currentDay &&
+          (e.day <= currentDay &&
             e.month === currentMonth &&
-            e.year === currentYear) ||(
-          e.month > currentMonth ||
-          e.year > currentYear)
-        )
+            e.year === currentYear) ||
+          e.month > currentMonth || e.year > currentYear
+      )
       .map(e => getIssuesStatistics(e.year, e.month, e.day))
   ).then(v => v.map(e => issues.length - e.statistics.counts.opened));
   return { issues, idealMonthData, monthData, labels, milestone, issuesCount };
@@ -182,8 +178,8 @@ const getContent = async () => {
             lineTension: 0.2,
             pointBackgroundColor: "#fff",
             pointBorderWidth: 10,
-            borderColor: '#fc28a8',
-            borderWidth: 7,
+            borderColor: "#fc28a8",
+            borderWidth: 7
           },
           {
             datalabels: {
@@ -207,10 +203,10 @@ const getContent = async () => {
       options: {
         layout: {
           padding: {
-              top: 50,
-              bottom: 0
+            top: 50,
+            bottom: 0
           }
-      },
+        },
         responsive: false,
         animation: {
           easing: "linear"
@@ -238,10 +234,13 @@ const getContent = async () => {
       }
     });
   }
-  console.log(issuesArr)
   const chart = createChart(issuesArr, mappedDates, issuesLength, color);
   window.chart = chart;
-
+  document
+    .querySelector("h1")
+    .addEventListener("click", () =>
+      document.documentElement.webkitRequestFullScreen()
+    );
   setInterval(async () => {
     const { issues, idealMonthData, labels, issuesCount } = await getContent();
     const newIssuesArr = await issuesCount;
