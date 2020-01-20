@@ -21,16 +21,152 @@
       font-size: 108px;
       text-shadow: 1px 1px 20px #03edf9, 1px 1px 20px #fc28a8,
         1px 1px 20px #fc28a8;
+      text-transform: uppercase;
+      user-select: none;
+    }
+
+    span.settings {
+      position: fixed;
+      color: white;
+      margin: 0;
+      top: 50px;
+      right: 50px;
+      font-size: 30px;
+      transition: transform 0.2s ease-in;
+      user-select: none;
+    }
+
+    span.settings:hover {
+      transform: rotate(25deg);
+      cursor: pointer;
+    }
+
+    .modal-layout {
+      z-index: 3;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      color: white;
+      width: 300px;
+      height: 220px;
+      position: relative;
+      padding: 25px;
+      box-shadow: 0px 1px 20px 6px #03edf926;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .modal-close {
+      right: 25px;
+      top: 20px;
+      position: absolute;
+      cursor: pointer;
+      transition: text-shadow 0.2s ease-in;
+    }
+
+    .modal-close:hover {
+      text-shadow: -3px -1px 9px #03edf9c7;
+    }
+
+    .modal-body {
+      min-height: 150px;
+    }
+
+    .modal-body div {
+      display: flex;
+      margin: 10px 0;
+      justify-content: space-between;
+    }
+
+    .modal-body div label {
+      min-width: 210px;
+    }
+    input[type="checkbox"] {
+      -webkit-appearance: none;
+      background-color: #fafafa;
+      border: 1px solid #cacece;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05),
+        inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05);
+      padding: 9px;
+      border-radius: 3px;
+      display: inline-block;
+      position: relative;
+      margin: 0;
+    }
+
+    input[type="checkbox"]:active,
+    input[type="checkbox"]:checked:active {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05),
+        inset 0px 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type="checkbox"]:checked {
+      background-color: #e9ecee;
+      border: 1px solid #adb8c0;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05),
+        inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05),
+        inset 15px 10px -12px rgba(255, 255, 255, 0.1);
+      color: #99a1a7;
+    }
+    input[type="checkbox"]:checked:after {
+      content: "\2714";
+      font-size: 14px;
+      position: absolute;
+      top: 0px;
+      left: 3px;
+      color: #99a1a7;
+    }
+
+    select {
+      width: 100%;
     }
   </style>
   <body>
+    <div class="modal-layout" style="display: none;">
+      <div class="modal-content">
+        <span class="modal-close">❌</span>
+        <div class="modal-title">Настройки</div>
+        <div class="modal-body">
+          <div>
+            <label for="fullscreen">Полноэкранный режим</label>
+            <input name="fullscreen" id="fullscreen" type="checkbox" />
+          </div>
+          <div>
+            <label form="team">Выбор команды</label>
+            <select name="team" id="team" class="select-css">
+              <option>Team Jedi</option>
+              <option>TeamXOR</option>
+              <option>Team LAMP</option>
+              <option>Team Onyx</option>
+              <option>NFCteam</option>
+              <option>Team Go</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer"></div>
+      </div>
+    </div>
     <canvas id="myChart"></canvas>
     <!-- <select>
         <option>Team Jedi</option>
         <option>TeamXOR</option>
     </select> -->
-    <h1>TEAM JEDI</h1>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <h1></h1>
+
+    <span class="settings">⚙</span>
   </body>
 </html>
