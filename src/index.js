@@ -8,11 +8,11 @@ import { modalTemplate } from "./templates";
 
 const apiUrl = "https://damp-reaches-06511.herokuapp.com";
 
-const currentDay = new Date().getDate();
+const getCurrentDay = () => new Date().getDate();
 
-const currentMonth = new Date().getUTCMonth() + 1;
+const getCurrentMonth = () => new Date().getUTCMonth() + 1;
 
-const currentYear = new Date().getUTCFullYear();
+const getCurrentYear = () => new Date().getUTCFullYear();
 
 const state = {
   teamLabel: "Team Jedi"
@@ -74,10 +74,9 @@ const getContent = async teamLabel => {
       fetch(
         `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}&team=${teamLabel}`
       ).then(r => r.json());
-    console.log(currentDay);
     const issuesCount = Promise.all(
       monthData
-        .filter(e => e.day <= currentDay)
+        .filter(e => e.day <= getCurrentDay())
         .map(e => getIssuesStatistics(e.year, e.month, e.day))
     ).then(v => v.map(e => issues.length - e.statistics.counts.opened));
     return {
@@ -116,11 +115,11 @@ const getContent = async teamLabel => {
     monthData
       .filter(
         e =>
-          (e.day <= currentDay &&
-            e.month === currentMonth &&
-            e.year === currentYear) ||
-          e.month > currentMonth ||
-          e.year > currentYear
+          (e.day <= getCurrentDay() &&
+            e.month === getCurrentMonth() &&
+            e.year === getCurrentYear()) ||
+          e.month > getCurrentMonth() ||
+          e.year > getCurrentYear()
       )
       .map(e => getIssuesStatistics(e.year, e.month, e.day))
   ).then(v => v.map(e => issues.length - e.statistics.counts.opened));
@@ -247,9 +246,7 @@ const getContent = async teamLabel => {
       }
     });
   }
-  const chart = createChart(issuesArr, mappedDates, issuesLength, color);
-  window.chart = chart;
-
+  createChart(issuesArr, mappedDates, issuesLength, color);
   document.querySelector(".settings").addEventListener("click", () => {
     document.querySelector(".modal-slot").innerHTML = modalTemplate(
       teamLabels.map(e => ({name:e.name, selected: state.teamLabel === e.name }))
@@ -257,7 +254,6 @@ const getContent = async teamLabel => {
     document
       .querySelector("#fullscreen")
       .addEventListener("change", ({ target }) => {
-        console.log(target);
         target.checked
           ? document.documentElement.webkitRequestFullScreen()
           : document.exitFullscreen();
