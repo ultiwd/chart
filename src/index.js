@@ -15,7 +15,8 @@ const getCurrentMonth = () => new Date().getUTCMonth() + 1;
 const getCurrentYear = () => new Date().getUTCFullYear();
 
 const state = {
-  teamLabel: "Team Jedi"
+  teamLabel: "Team Jedi",
+  isFullscreen: false
 };
 
 const doneIssueLabel = "Done Dev";
@@ -185,7 +186,6 @@ const getContent = async teamLabel => {
                 }
               }
             },
-            label: "Sprint Burndown",
             data: issuesArr,
             lineTension: 0.2,
             pointBackgroundColor: "#fff",
@@ -197,7 +197,6 @@ const getContent = async teamLabel => {
             datalabels: {
               display: false
             },
-            label: "Ideal Burndown",
             data: mappedDates,
             borderColor: gradientStroke,
             pointBorderColor: "#03edf9",
@@ -213,6 +212,9 @@ const getContent = async teamLabel => {
       },
 
       options: {
+        legend: {
+          display: false
+        },
         layout: {
           padding: {
             top: 50,
@@ -249,14 +251,22 @@ const getContent = async teamLabel => {
   createChart(issuesArr, mappedDates, issuesLength, color);
   document.querySelector(".settings").addEventListener("click", () => {
     document.querySelector(".modal-slot").innerHTML = modalTemplate(
-      teamLabels.map(e => ({name:e.name, selected: state.teamLabel === e.name }))
+      teamLabels.map(e => ({
+        name: e.name,
+        selected: state.teamLabel === e.name
+      })),
+      state
     );
     document
       .querySelector("#fullscreen")
       .addEventListener("change", ({ target }) => {
-        target.checked
-          ? document.documentElement.webkitRequestFullScreen()
-          : document.exitFullscreen();
+        if (target.checked) {
+          document.documentElement.webkitRequestFullScreen();
+          state.isFullscreen = true;
+        } else {
+          document.exitFullscreen();
+          state.isFullscreen = false;
+        }
       });
 
     document.querySelector("#team").addEventListener("change", e => {

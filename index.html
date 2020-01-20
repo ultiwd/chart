@@ -3,6 +3,8 @@
     <title>Chart</title>
   </head>
   <style>
+    @import url('https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300&display=swap');
+
     body {
       background: black;
       position: relative;
@@ -54,7 +56,7 @@
 
     .modal-content {
       color: white;
-      width: 300px;
+      width: 440px;
       height: 220px;
       position: relative;
       padding: 25px;
@@ -62,12 +64,14 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      font-family: 'Open Sans Condensed', sans-serif;
     }
 
     .modal-title {
-      font-size: 20px;
+      font-size: 30px;
       text-align: center;
       font-weight: bold;
+      font-family: 'Open Sans Condensed', sans-serif;
     }
 
     .modal-close {
@@ -90,10 +94,13 @@
       display: flex;
       margin: 10px 0;
       justify-content: space-between;
+      align-items: center;
     }
 
     .modal-body div label {
       min-width: 210px;
+      font-size: 24px;
+      margin: 0;
     }
     input[type="checkbox"] {
       -webkit-appearance: none;
@@ -106,6 +113,11 @@
       display: inline-block;
       position: relative;
       margin: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     input[type="checkbox"]:active,
@@ -124,20 +136,21 @@
     }
     input[type="checkbox"]:checked:after {
       content: "\2714";
-      font-size: 14px;
-      position: absolute;
-      top: 0px;
-      left: 3px;
-      color: #99a1a7;
+      font-size: 30px;
+      position: relative;
+      color: #09b8c1;
     }
 
     select {
       width: 100%;
+      font-size: 24px;
+      min-width: 159px;
+      font-family: inherit;
     }
 
     svg {
-      width: 35px;
-      height: 35px;
+      width: 55px;
+      height: 55px;
       fill: white;
     }
   </style>
