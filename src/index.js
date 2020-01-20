@@ -4,6 +4,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 
 // Helpers
 import { getDates, getData, convertData, transformData } from "./helpers";
+import { modalTemplate } from "./templates";
 
 const apiUrl = "https://damp-reaches-06511.herokuapp.com";
 
@@ -14,20 +15,25 @@ const currentMonth = new Date().getUTCMonth() + 1;
 const currentYear = new Date().getUTCFullYear();
 
 const state = {
-  teamLabel: 'Team Jedi'
-}
+  teamLabel: "Team Jedi"
+};
 
 const doneIssueLabel = "Done Dev";
 
-const getContent = async (teamLabel) => {
+const getContent = async teamLabel => {
   const milestone = await fetch(`${apiUrl}/milestone`).then(r => r.json());
 
-  const issues = await fetch(`${apiUrl}/issues?team=${teamLabel}`).then(r => r.json());
+  const issues = await fetch(`${apiUrl}/issues?team=${teamLabel}`).then(r =>
+    r.json()
+  );
 
   const labels = (await fetch(`${apiUrl}/labels`).then(r => r.json())).filter(
     e => e.name === teamLabel
   );
 
+  const teamLabels = (
+    await fetch(`${apiUrl}/labels`).then(r => r.json())
+  ).filter(e => e.name.toLowerCase().includes("team"));
 
   const {
     startYear,
@@ -68,7 +74,7 @@ const getContent = async (teamLabel) => {
       fetch(
         `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}&team=${teamLabel}`
       ).then(r => r.json());
-      console.log(currentDay)
+    console.log(currentDay);
     const issuesCount = Promise.all(
       monthData
         .filter(e => e.day <= currentDay)
@@ -80,7 +86,8 @@ const getContent = async (teamLabel) => {
       monthData,
       labels,
       milestone,
-      issuesCount
+      issuesCount,
+      teamLabels
     };
   }
   const [idealMonthData, monthData] = transformData([
@@ -117,7 +124,15 @@ const getContent = async (teamLabel) => {
       )
       .map(e => getIssuesStatistics(e.year, e.month, e.day))
   ).then(v => v.map(e => issues.length - e.statistics.counts.opened));
-  return { issues, idealMonthData, monthData, labels, milestone, issuesCount };
+  return {
+    issues,
+    idealMonthData,
+    monthData,
+    labels,
+    milestone,
+    issuesCount,
+    teamLabels
+  };
 };
 
 (async () => {
@@ -126,7 +141,8 @@ const getContent = async (teamLabel) => {
     idealMonthData,
     monthData,
     labels,
-    issuesCount
+    issuesCount,
+    teamLabels
   } = await getContent(state.teamLabel);
   const issuesArr = await issuesCount;
 
@@ -233,47 +249,49 @@ const getContent = async (teamLabel) => {
   }
   const chart = createChart(issuesArr, mappedDates, issuesLength, color);
   window.chart = chart;
-  document
-    .querySelector("#fullscreen")
-    .addEventListener("change", ({ target }) => {
-      console.log(target);
-      target.checked
-        ? document.documentElement.webkitRequestFullScreen()
-        : document.exitFullscreen();
+
+  document.querySelector(".settings").addEventListener("click", () => {
+    document.querySelector(".modal-slot").innerHTML = modalTemplate(
+      teamLabels.map(e => ({name:e.name, selected: state.teamLabel === e.name }))
+    );
+    document
+      .querySelector("#fullscreen")
+      .addEventListener("change", ({ target }) => {
+        console.log(target);
+        target.checked
+          ? document.documentElement.webkitRequestFullScreen()
+          : document.exitFullscreen();
+      });
+
+    document.querySelector("#team").addEventListener("change", e => {
+      state.teamLabel = e.target.value;
+      updateChart().then(
+        () => (document.querySelector("h1").innerHTML = state.teamLabel)
+      );
     });
-
-  document
-    .querySelector(".settings")
-    .addEventListener(
-      "click",
-      () => (document.querySelector(".modal-layout").style.display = "flex")
-    );
-  document
-    .querySelector(".modal-close")
-    .addEventListener(
-      "click",
-      () => (document.querySelector(".modal-layout").style.display = "none")
-    );
-
+    document
+      .querySelector(".modal-close")
+      .addEventListener(
+        "click",
+        () => (document.querySelector(".modal-slot").innerHTML = "")
+      );
+  });
 
   const updateChart = async () => {
-    const { issues, idealMonthData, labels, issuesCount } = await getContent(state.teamLabel);
+    const { issues, idealMonthData, labels, issuesCount } = await getContent(
+      state.teamLabel
+    );
     const newIssuesArr = await issuesCount;
-     
-    const  issuesLength = issues.length
+
+    const issuesLength = issues.length;
     const mappedDates = idealMonthData.map(
-        (e, i) =>
-          issues.length - (issues.length / (idealMonthData.length - 1)) * i
-      )
-      const color = labels[0].color
+      (e, i) =>
+        issues.length - (issues.length / (idealMonthData.length - 1)) * i
+    );
+    const color = labels[0].color;
 
     createChart(newIssuesArr, mappedDates, issuesLength, color);
-  }
-
-  document.querySelector('#team').addEventListener('change', (e) => {
-    state.teamLabel = e.target.value
-    updateChart().then(() => document.querySelector("h1").innerHTML = state.teamLabel)
-  })
+  };
 
   document.querySelector("h1").innerHTML = state.teamLabel;
   setInterval(updateChart, 1000000);
