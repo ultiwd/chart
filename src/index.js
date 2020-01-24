@@ -28,6 +28,10 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
 
   const validator = {
     set: function(target, key, value) {
+      if (key === 'isFullscreen') {
+        target[key] = value
+        return true
+      }
       if (key === "isFetching") {
         if (value) {
           document.querySelector("#preloader").style.display = "flex";
