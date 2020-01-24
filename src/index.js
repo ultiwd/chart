@@ -8,101 +8,146 @@ import { modalTemplate } from "./templates";
 
 const apiUrl = "https://damp-reaches-06511.herokuapp.com";
 (async () => {
-const getCurrentDay = () => new Date().getDate();
+  const getCurrentDay = () => new Date().getDate();
 
-const getCurrentMonth = () => new Date().getUTCMonth() + 1;
+  const getCurrentMonth = () => new Date().getUTCMonth() + 1;
 
-const getCurrentYear = () => new Date().getUTCFullYear();
-const teamLabels = [
-  ...new Set(
-    (await fetch(`${apiUrl}/labels`).then(r => r.json()))
-      .filter(e => e.name.toLowerCase().includes("team"))
-      .map(e => e.name)
-  )
-];
-const obj = {
-  teamLabel: "Team Jedi",
-  isFullscreen: false,
-  isFetching: false
-};
+  const getCurrentYear = () => new Date().getUTCFullYear();
+  const teamLabels = [
+    ...new Set(
+      (await fetch(`${apiUrl}/labels`).then(r => r.json()))
+        .filter(e => e.name.toLowerCase().includes("team"))
+        .map(e => e.name)
+    )
+  ];
+  const obj = {
+    teamLabel: "Team Jedi",
+    isFullscreen: false,
+    isFetching: false
+  };
 
-const validator = {
-  set: function(target, key, value) {
-    if (key === "isFetching") {
-      if (value) {
-        document.querySelector("#preloader").style.display = "flex";
-      } else {
-        document.querySelector("#preloader").style.display = "none";
+  const validator = {
+    set: function(target, key, value) {
+      if (key === "isFetching") {
+        if (value) {
+          document.querySelector("#preloader").style.display = "flex";
+        } else {
+          document.querySelector("#preloader").style.display = "none";
+        }
       }
-    } if (key === 'teamLabel') {
-      target[key] = value
-      if (document.querySelector('select')) {
-        document.querySelector('select').selectedIndex = teamLabels.indexOf(value)
+      if (key === "teamLabel") {
+        target[key] = value;
+        if (document.querySelector("select")) {
+          document.querySelector("select").selectedIndex = teamLabels.indexOf(
+            value
+          );
+        }
+        return true;
       }
       return true;
     }
-    return true;
-  }
-};
+  };
 
-const state = new Proxy(obj, validator);
+  const state = new Proxy(obj, validator);
 
-const doneIssueLabel = "Done Dev";
+  const doneIssueLabel = "Done Dev";
 
-const getContent = async teamLabel => {
-  const milestone = await fetch(`${apiUrl}/milestone`).then(r => r.json());
+  const getContent = async teamLabel => {
+    const milestone = await fetch(`${apiUrl}/milestone`).then(r => r.json());
 
-  const issues = await fetch(`${apiUrl}/issues?team=${teamLabel}`).then(r =>
-    r.json()
-  );
+    const issues = await fetch(`${apiUrl}/issues?team=${teamLabel}`).then(r =>
+      r.json()
+    );
 
-  const labels = (await fetch(`${apiUrl}/labels`).then(r => r.json())).filter(
-    e => e.name === teamLabel
-  );
+    const labels = (await fetch(`${apiUrl}/labels`).then(r => r.json())).filter(
+      e => e.name === teamLabel
+    );
 
+    const {
+      startYear,
+      startDay,
+      endDay,
+      startMonth,
+      endMonth,
+      endYear
+    } = getDates(milestone);
+    if (startYear === endYear && startMonth === endMonth) {
+      const monthData = (await getData(startYear, startMonth))
+        .map((el, i) => ({
+          day: i + 1,
+          type: el === "0" ? "workday" : "holyday",
+          month: startMonth,
+          year: startYear
+        }))
+        .filter(
+          el => el.type === "workday" && el.day >= startDay && el.day <= endDay
+        );
 
-  const {
-    startYear,
-    startDay,
-    endDay,
-    startMonth,
-    endMonth,
-    endYear
-  } = getDates(milestone);
-  if (startYear === endYear && startMonth === endMonth) {
-    const monthData = (await getData(startYear, startMonth))
-      .map((el, i) => ({
-        day: i + 1,
-        type: el === "0" ? "workday" : "holyday",
-        month: startMonth,
-        year: startYear
-      }))
-      .filter(
-        el => el.type === "workday" && el.day >= startDay && el.day <= endDay
-      );
-
-    const idealMonthData = monthData
-      .reduceRight(
-        (acc, e, i) => {
-          if (acc.countOfThursdays === 0) {
-            const { day, month, year } = e;
-            if (new Date(`${month}-${day}-${year}`).getDay() === 4) {
-              return { ...acc, countOfThursdays: 1, arr: [...acc.arr, e] };
+      const idealMonthData = monthData
+        .reduceRight(
+          (acc, e, i) => {
+            if (acc.countOfThursdays === 0) {
+              const { day, month, year } = e;
+              if (new Date(`${month}-${day}-${year}`).getDay() === 4) {
+                return { ...acc, countOfThursdays: 1, arr: [...acc.arr, e] };
+              }
+              return acc;
             }
-            return acc;
-          }
-          return { ...acc, arr: [...acc.arr, e] };
-        },
-        { countOfThursdays: 0, arr: [] }
+            return { ...acc, arr: [...acc.arr, e] };
+          },
+          { countOfThursdays: 0, arr: [] }
+        )
+        .arr.reverse();
+      const getIssuesStatistics = async (year, month, day) =>
+        fetch(
+          `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}&team=${teamLabel}`
+        ).then(r => r.json());
+      const issuesCount = Promise.all(
+        monthData
+          .filter(e => e.day <= getCurrentDay())
+          .map(e => getIssuesStatistics(e.year, e.month, e.day))
+      ).then(v => v.map(e => issues.length - e.statistics.counts.opened));
+      return {
+        issues,
+        idealMonthData,
+        monthData,
+        labels,
+        milestone,
+        issuesCount
+      };
+    }
+    const [idealMonthData, monthData] = transformData([
+      convertData(
+        await getData(startYear, startMonth),
+        startYear,
+        startMonth,
+        startDay,
+        "start"
+      ),
+      convertData(
+        await getData(endYear, endMonth),
+        endYear,
+        endMonth,
+        endDay,
+        "end"
       )
-      .arr.reverse();
-    const getIssuesStatistics = async (year, month, day) =>
+    ]);
+
+    const getIssuesStatistics = (year, month, day) =>
       fetch(
-        `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}&team=${teamLabel}`
+        `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}`
       ).then(r => r.json());
+
     const issuesCount = Promise.all(
       monthData
-        .filter(e => e.day <= getCurrentDay())
+        .filter(
+          e =>
+            (e.day <= getCurrentDay() &&
+              e.month === getCurrentMonth() &&
+              e.year === getCurrentYear()) ||
+            e.month > getCurrentMonth() ||
+            e.year > getCurrentYear()
+        )
         .map(e => getIssuesStatistics(e.year, e.month, e.day))
     ).then(v => v.map(e => issues.length - e.statistics.counts.opened));
     return {
@@ -111,64 +156,17 @@ const getContent = async teamLabel => {
       monthData,
       labels,
       milestone,
-      issuesCount,
-      teamLabels
+      issuesCount
     };
-  }
-  const [idealMonthData, monthData] = transformData([
-    convertData(
-      await getData(startYear, startMonth),
-      startYear,
-      startMonth,
-      startDay,
-      "start"
-    ),
-    convertData(
-      await getData(endYear, endMonth),
-      endYear,
-      endMonth,
-      endDay,
-      "end"
-    )
-  ]);
-
-  const getIssuesStatistics = (year, month, day) =>
-    fetch(
-      `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}`
-    ).then(r => r.json());
-
-  const issuesCount = Promise.all(
-    monthData
-      .filter(
-        e =>
-          (e.day <= getCurrentDay() &&
-            e.month === getCurrentMonth() &&
-            e.year === getCurrentYear()) ||
-          e.month > getCurrentMonth() ||
-          e.year > getCurrentYear()
-      )
-      .map(e => getIssuesStatistics(e.year, e.month, e.day))
-  ).then(v => v.map(e => issues.length - e.statistics.counts.opened));
-  return {
-    issues,
-    idealMonthData,
-    monthData,
-    labels,
-    milestone,
-    issuesCount,
-    teamLabels
   };
-};
 
-(async () => {
   state.isFetching = true;
   const {
     issues,
     idealMonthData,
     monthData,
     labels,
-    issuesCount,
-    teamLabels
+    issuesCount
   } = await getContent(state.teamLabel);
   const issuesArr = await issuesCount;
   const issuesLength = issues.length;
@@ -248,7 +246,7 @@ const getContent = async teamLabel => {
         },
         responsive: false,
         animation: {
-          easing: "linear",
+          easing: "linear"
         },
         scales: {
           yAxes: [
@@ -313,9 +311,9 @@ const getContent = async teamLabel => {
     state.isFetching = true;
     const currentTeamLabelId = teamLabels.indexOf(state.teamLabel);
     const nextTeamLabelId =
-    currentTeamLabelId === teamLabels.length - 1 ? 0 : currentTeamLabelId + 1;
+      currentTeamLabelId === teamLabels.length - 1 ? 0 : currentTeamLabelId + 1;
     state.teamLabel = teamLabels[nextTeamLabelId];
-    console.log(currentTeamLabelId, teamLabels, nextTeamLabelId)
+
     const { issues, idealMonthData, labels, issuesCount } = await getContent(
       state.teamLabel
     );
@@ -337,4 +335,3 @@ const getContent = async teamLabel => {
   setInterval(updateChart, 10000);
   state.isFetching = false;
 })();
-})()
