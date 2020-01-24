@@ -336,6 +336,6 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
   };
 
   document.querySelector("h1").innerHTML = state.teamLabel;
-  setInterval(updateChart, 10000);
+  setInterval(updateChart, 30000);
   state.isFetching = false;
 })();
