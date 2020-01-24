@@ -334,7 +334,7 @@ const getContent = async teamLabel => {
   };
 
   document.querySelector("h1").innerHTML = state.teamLabel;
-  setInterval(updateChart, 100000);
+  setInterval(updateChart, 10000);
   state.isFetching = false;
 })();
 })()
