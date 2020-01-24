@@ -7,17 +7,45 @@ import { getDates, getData, convertData, transformData } from "./helpers";
 import { modalTemplate } from "./templates";
 
 const apiUrl = "https://damp-reaches-06511.herokuapp.com";
-
+(async () => {
 const getCurrentDay = () => new Date().getDate();
 
 const getCurrentMonth = () => new Date().getUTCMonth() + 1;
 
 const getCurrentYear = () => new Date().getUTCFullYear();
-
-const state = {
+const teamLabels = [
+  ...new Set(
+    (await fetch(`${apiUrl}/labels`).then(r => r.json()))
+      .filter(e => e.name.toLowerCase().includes("team"))
+      .map(e => e.name)
+  )
+];
+const obj = {
   teamLabel: "Team Jedi",
-  isFullscreen: false
+  isFullscreen: false,
+  isFetching: false
 };
+
+const validator = {
+  set: function(target, key, value) {
+    if (key === "isFetching") {
+      if (value) {
+        document.querySelector("#preloader").style.display = "flex";
+      } else {
+        document.querySelector("#preloader").style.display = "none";
+      }
+    } if (key === 'teamLabel') {
+      target[key] = value
+      if (document.querySelector('select')) {
+        document.querySelector('select').selectedIndex = teamLabels.indexOf(value)
+      }
+      return true;
+    }
+    return true;
+  }
+};
+
+const state = new Proxy(obj, validator);
 
 const doneIssueLabel = "Done Dev";
 
@@ -32,9 +60,6 @@ const getContent = async teamLabel => {
     e => e.name === teamLabel
   );
 
-  const teamLabels = (
-    await fetch(`${apiUrl}/labels`).then(r => r.json())
-  ).filter(e => e.name.toLowerCase().includes("team"));
 
   const {
     startYear,
@@ -136,6 +161,7 @@ const getContent = async teamLabel => {
 };
 
 (async () => {
+  state.isFetching = true;
   const {
     issues,
     idealMonthData,
@@ -145,7 +171,6 @@ const getContent = async teamLabel => {
     teamLabels
   } = await getContent(state.teamLabel);
   const issuesArr = await issuesCount;
-
   const issuesLength = issues.length;
   const mappedDates = idealMonthData.map(
     (e, i) => issues.length - (issues.length / (idealMonthData.length - 1)) * i
@@ -223,7 +248,7 @@ const getContent = async teamLabel => {
         },
         responsive: false,
         animation: {
-          easing: "linear"
+          easing: "linear",
         },
         scales: {
           yAxes: [
@@ -252,8 +277,8 @@ const getContent = async teamLabel => {
   document.querySelector(".settings").addEventListener("click", () => {
     document.querySelector(".modal-slot").innerHTML = modalTemplate(
       teamLabels.map(e => ({
-        name: e.name,
-        selected: state.teamLabel === e.name
+        name: e,
+        selected: state.teamLabel === e
       })),
       state
     );
@@ -284,6 +309,13 @@ const getContent = async teamLabel => {
   });
 
   const updateChart = async () => {
+    if (state.isFetching) return;
+    state.isFetching = true;
+    const currentTeamLabelId = teamLabels.indexOf(state.teamLabel);
+    const nextTeamLabelId =
+    currentTeamLabelId === teamLabels.length - 1 ? 0 : currentTeamLabelId + 1;
+    state.teamLabel = teamLabels[nextTeamLabelId];
+    console.log(currentTeamLabelId, teamLabels, nextTeamLabelId)
     const { issues, idealMonthData, labels, issuesCount } = await getContent(
       state.teamLabel
     );
@@ -297,8 +329,12 @@ const getContent = async teamLabel => {
     const color = labels[0].color;
 
     createChart(newIssuesArr, mappedDates, issuesLength, color);
+    document.querySelector("h1").innerHTML = state.teamLabel;
+    state.isFetching = false;
   };
 
   document.querySelector("h1").innerHTML = state.teamLabel;
-  setInterval(updateChart, 1000000);
+  setInterval(updateChart, 100000);
+  state.isFetching = false;
 })();
+})()

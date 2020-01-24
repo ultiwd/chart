@@ -9,7 +9,7 @@ export const modalTemplate = (teamLabels, state) => `<div class="modal-layout">
     </div>
     <div>
       <label form="team">Выбор команды</label>
-      <select name="team" id="team" class="select-css">
+      <select ${state.isFetching && disabled} name="team" id="team" class="select-css">
         ${teamLabels
           .map(
             label =>
