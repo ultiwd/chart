@@ -40,12 +40,12 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
         }
       }
       if (key === "teamLabel") {
-        target[key] = value;
         if (document.querySelector("select")) {
           document.querySelector("select").selectedIndex = teamLabels.indexOf(
-            value
+            value 
           );
         }
+        target[key] = value
         return true;
       }
       return true;
