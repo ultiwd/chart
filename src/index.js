@@ -42,7 +42,7 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
       if (key === "teamLabel") {
         if (document.querySelector("select")) {
           document.querySelector("select").selectedIndex = teamLabels.indexOf(
-            value 
+            value
           );
         }
         target[key] = value
@@ -298,9 +298,7 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
 
     document.querySelector("#team").addEventListener("change", e => {
       state.teamLabel = e.target.value;
-      updateChart().then(
-        () => (document.querySelector("h1").innerHTML = state.teamLabel)
-      );
+      updateChart(e.target.value)
     });
     document
       .querySelector(".modal-close")
@@ -310,14 +308,16 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
       );
   });
 
-  const updateChart = async () => {
+  const updateChart = async (nextTeamLabel) => {
     if (state.isFetching) return;
     state.isFetching = true;
-    const currentTeamLabelId = teamLabels.indexOf(state.teamLabel);
-    const nextTeamLabelId =
-      currentTeamLabelId === teamLabels.length - 1 ? 0 : currentTeamLabelId + 1;
-    state.teamLabel = teamLabels[nextTeamLabelId];
 
+    if (!nextTeamLabel) {
+      const currentTeamLabelId = teamLabels.indexOf(state.teamLabel);
+      const nextTeamLabelId =
+        currentTeamLabelId === teamLabels.length - 1 ? 0 : currentTeamLabelId + 1;
+      state.teamLabel = teamLabels[nextTeamLabelId];
+    }
     const { issues, idealMonthData, labels, issuesCount } = await getContent(
       state.teamLabel
     );
@@ -336,6 +336,6 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
   };
 
   document.querySelector("h1").innerHTML = state.teamLabel;
-  setInterval(updateChart, 1000000);
+  setInterval(updateChart, 100000);
   state.isFetching = false;
 })();
