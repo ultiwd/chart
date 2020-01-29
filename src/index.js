@@ -141,16 +141,17 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
       fetch(
         `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}`
       ).then(r => r.json());
-
+        console.log(getCurrentDay)
     const issuesCount = Promise.all(
       monthData
         .filter(
-          e =>
-            (e.day <= getCurrentDay() &&
+          e => {
+            console.log(e, getCurrentDay(), getCurrentMonth())
+
+            return (e.day <= getCurrentDay() &&
               e.month === getCurrentMonth() &&
-              e.year === getCurrentYear()) ||
-            e.month > getCurrentMonth() ||
-            e.year > getCurrentYear()
+              e.year === getCurrentYear())
+          }
         )
         .map(e => getIssuesStatistics(e.year, e.month, e.day))
     ).then(v => v.map(e => issues.length - e.statistics.counts.opened));

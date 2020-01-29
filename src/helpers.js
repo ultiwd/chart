@@ -47,7 +47,7 @@ export const transformData = arr => [
       { countOfThursdays: 0, arr: [] }
     )
     .arr.reverse(),
-  arr.flatMap(e => e)
+  arr.flatMap(e => e).map(e => ({...e, day: e.day[0]}))
 ];
 
 export const getDates = milestone => ({
