@@ -146,11 +146,17 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
       monthData
         .filter(
           e => {
-            console.log(e, getCurrentDay(), getCurrentMonth())
-
-            return (e.day <= getCurrentDay() &&
-              e.month === getCurrentMonth() &&
-              e.year === getCurrentYear())
+            console.log(e)
+            return (
+              (e.day <= getCurrentDay() &&
+                e.month === getCurrentMonth() &&
+                e.year === getCurrentYear())
+                || (
+                  e.day >= getCurrentDay() &&
+                e.month < getCurrentMonth() &&
+                e.year === getCurrentYear()
+                )
+            );
           }
         )
         .map(e => getIssuesStatistics(e.year, e.month, e.day))
