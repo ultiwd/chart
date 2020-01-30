@@ -139,7 +139,7 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
 
     const getIssuesStatistics = (year, month, day) =>
       fetch(
-        `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}`
+        `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}&team=${teamLabel}`
       ).then(r => r.json());
         console.log(getCurrentDay)
     const issuesCount = Promise.all(
