@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const Dotenv = require("dotenv-webpack");
 
 module.exports = {
   output: {
@@ -18,9 +19,14 @@ module.exports = {
                 "@babel/preset-env",
                 {
                   targets: {
-                    "browsers": ["> 1%", "last 2 versions", "Android >= 3.2", "not ie <= 8"]
+                    browsers: [
+                      "> 1%",
+                      "last 2 versions",
+                      "Android >= 3.2",
+                      "not ie <= 8"
+                    ]
                   },
-                  useBuiltIns: 'usage'
+                  useBuiltIns: "usage"
                 }
               ]
             ],
@@ -37,6 +43,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: "./index.html"
-    })
+    }),
+    new Dotenv()
   ]
 };

@@ -6,7 +6,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import { getDates, getData, convertData, transformData } from "./helpers";
 import { modalTemplate } from "./templates";
 
-const apiUrl = "https://damp-reaches-06511.herokuapp.com";
+const apiUrl = process.env.API_URL;
 (async () => {
   const getCurrentDay = () => new Date().getDate();
 
@@ -28,9 +28,9 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
 
   const validator = {
     set: function(target, key, value) {
-      if (key === 'isFullscreen') {
-        target[key] = value
-        return true
+      if (key === "isFullscreen") {
+        target[key] = value;
+        return true;
       }
       if (key === "isFetching") {
         if (value) {
@@ -45,7 +45,7 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
             value
           );
         }
-        target[key] = value
+        target[key] = value;
         return true;
       }
       return true;
@@ -141,24 +141,18 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
       fetch(
         `${apiUrl}/issues_statistics?year=${year}&month=${month}&day=${day}&team=${teamLabel}`
       ).then(r => r.json());
-        console.log(getCurrentDay)
     const issuesCount = Promise.all(
       monthData
-        .filter(
-          e => {
-            console.log(e)
-            return (
-              (e.day <= getCurrentDay() &&
-                e.month === getCurrentMonth() &&
-                e.year === getCurrentYear())
-                || (
-                  e.day >= getCurrentDay() &&
-                e.month < getCurrentMonth() &&
-                e.year === getCurrentYear()
-                )
-            );
-          }
-        )
+        .filter(e => {
+          return (
+            (e.day <= getCurrentDay() &&
+              e.month === getCurrentMonth() &&
+              e.year === getCurrentYear()) ||
+            (e.day >= getCurrentDay() &&
+              e.month < getCurrentMonth() &&
+              e.year === getCurrentYear())
+          );
+        })
         .map(e => getIssuesStatistics(e.year, e.month, e.day))
     ).then(v => v.map(e => issues.length - e.statistics.counts.opened));
     return {
@@ -305,7 +299,7 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
 
     document.querySelector("#team").addEventListener("change", e => {
       state.teamLabel = e.target.value;
-      updateChart(e.target.value)
+      updateChart(e.target.value);
     });
     document
       .querySelector(".modal-close")
@@ -315,14 +309,16 @@ const apiUrl = "https://damp-reaches-06511.herokuapp.com";
       );
   });
 
-  const updateChart = async (nextTeamLabel) => {
+  const updateChart = async nextTeamLabel => {
     if (state.isFetching) return;
     state.isFetching = true;
 
     if (!nextTeamLabel) {
       const currentTeamLabelId = teamLabels.indexOf(state.teamLabel);
       const nextTeamLabelId =
-        currentTeamLabelId === teamLabels.length - 1 ? 0 : currentTeamLabelId + 1;
+        currentTeamLabelId === teamLabels.length - 1
+          ? 0
+          : currentTeamLabelId + 1;
       state.teamLabel = teamLabels[nextTeamLabelId];
     }
     const { issues, idealMonthData, labels, issuesCount } = await getContent(
