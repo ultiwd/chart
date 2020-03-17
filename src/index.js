@@ -4,9 +4,11 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 
 // Helpers
 import { getDates, getData, convertData, transformData } from "./helpers";
+
+// Template
 import { modalTemplate } from "./templates";
 
-const apiUrl = process.env.API_URL;
+const { API_URL: apiUrl } = process.env;
 (async () => {
   const getCurrentDay = () => new Date().getDate();
 
@@ -53,8 +55,6 @@ const apiUrl = process.env.API_URL;
   };
 
   const state = new Proxy(obj, validator);
-
-  const doneIssueLabel = "Done Dev";
 
   const getContent = async teamLabel => {
     const milestone = await fetch(`${apiUrl}/milestone`).then(r => r.json());

@@ -58,26 +58,3 @@ export const getDates = milestone => ({
   endMonth: new Date(milestone.due_date).getUTCMonth() + 1,
   endYear: new Date(milestone.due_date).getUTCFullYear()
 });
-
-// getJSON = (db, milestone, issues, doneIssues, currentDay, teamLabel) => ({
-//   milestones: {
-//     ...db.milestones,
-//     [milestone.iid]: {
-//       ...milestone,
-//       ...db.milestones[milestone.iid],
-//       [teamLabel]: {
-//         ...(db.milestones[milestone.iid]
-//           ? { ...db.milestones[milestone.iid][teamLabel] }
-//           : {}),
-//         days: {
-//           ...(db.milestones[milestone.iid][teamLabel]
-//             ? { ...db.milestones[milestone.iid][teamLabel].days }
-//             : {}),
-//           [currentDay]: {
-//             issuesLeft: issues.length - doneIssues.length
-//           }
-//         }
-//       }
-//     }
-//   }
-// });
